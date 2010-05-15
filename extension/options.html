@@ -1,0 +1,204 @@
+<html>
+<head>
+	<script>
+	/*
+	 * Chrome URL Extender options.html
+	 * http://www.tacticalcoder.com
+	 *
+	 * Copyright 2010, Don Magee
+	 * Dual licensed under the MIT or GPL Version 2 licenses.
+	 *
+	 * Created Date: Tuesday March 30th, 2010
+	 *
+	 * Last Modified Date: Saturday April 24th, 2010
+	 * 
+	 */
+	</script>
+<title>Chrome URL Expander - Options</title>
+<style>
+	body {
+		font-family:helvetica, arial, sans-serif;
+		font-size:80%;
+		margin:10px;
+	}
+	
+	#header {
+		padding-bottom: 1.5em;
+		padding-top: 1.5em;
+	}
+	
+	#header h1 {
+		font-size: 156%;
+		display: inline;
+		padding-bottom: 43px;
+		padding-left: 75px;
+		padding-top: 40px;
+	}
+	
+	#footer {
+		margin-left: 24px;
+		martin-top: 12px;
+	}
+	
+	.curle-settings-content {
+		margin: 6px 6px 0 6px;
+		padding: 10px;
+		color: #333;
+		border: 1px solid #dedede;
+		-webkit-border-radius: 5px 5px;
+	}
+	.curle-settings-table {
+		width: 100%;
+		font-size: 1em;
+	}
+	
+	.curle-settings-table .left, .curle-settings-table .right {
+		vertical-align: top;
+		border-bottom: 0 dotted #aaa;
+	}
+	
+	.curle-settings-table th {
+		text-align: right;
+		width: 1%;
+		white-space: nowrap;
+		padding: 12px 24px 12px 12px;
+	}
+	
+	.curle-settings-table td {
+		width: 99%;
+		white-space: nowrap;
+		padding: 12px;
+	}
+	
+</style>
+<script src='libs/jquery-1.4.2.min.js'></script>
+<script>
+$(document).ready(function() {
+  /**
+	* The first thing we need to do is load the default settings
+	*/
+ 	chrome.extension.getBackgroundPage().checkOptions();
+	init();
+	
+});
+
+function init()
+{
+	$("#max_url_length").val(localStorage.maxUrlLength);
+	if(localStorage.updateLinkText == 1)
+	{
+		$("#update_link_text").attr('checked', true);
+	} else
+	{
+		$("#update_link_text").attr('checked', false);
+	}
+	if(localStorage.updateLinkUrl == 1)
+	{
+		$("#update_link_url").attr('checked', true);
+	} else
+	{
+		$("#update_link_url").attr('checked', false);
+	}
+	if(localStorage.showTitle == 1)
+	{
+		$("#update_link_title").attr('checked', true);
+	} else
+	{
+		$("#update_link_title").attr('checked', false);
+	}
+	makeClean();
+	$("#max_url_length").keydown(function() {
+		makeDirty();
+	});
+	$("#update_link_text").change(function() {
+		makeDirty();
+	})
+	$("#update_link_url").change(function() {
+		makeDirty();
+	})
+	$("#update_link_title").change(function() {
+		makeDirty();
+	})
+	$("#update_url_cache").keydown(function(){
+		makeDirty();
+	})
+	$("#save-button").click(saveOptions);
+}
+
+function saveOptions()
+{
+	localStorage.maxUrlLength = $("#max_url_length").val();
+	localStorage.cacheLength = $("#max_url_cache").val();
+	if($("#update_link_text").is(':checked'))
+	{
+		localStorage.updateLinkText = 1;
+	} else
+	{
+		localStorage.updateLinkText = 0;
+	}
+	if($("#update_link_url").is(':checked'))
+	{
+		localStorage.updateLinkUrl = 1;
+	} else
+	{
+		localStorage.updateLinkUrl = 0;
+	}
+	if($("#update_link_title").is(':checked'))
+	{
+		localStorage.showTitle = 1;
+	} else
+	{
+		localStorage.showTitle = 0;
+	}
+	makeClean();
+}
+
+function makeClean()
+{
+	$("#save-button").attr('disabled', 'disabled');
+}
+
+function makeDirty()
+{
+	$("#save-button").removeAttr('disabled');
+}
+</script>
+</head>
+<body>
+
+<div id="header"><h1>Chrome URL Expander - Options</h1></div>
+
+<div class="curle-settings-content">
+	<table class="curle-settings-table">
+		<tbody>
+			<tr>
+				<th class="left">Maximum Display Length <br />A value of 0 will show the full URL.</th>
+				<td class="right"><input type="text" name="max_url_length" id="max_url_length" value="0" /></td>
+			</tr>
+			<tr>
+				<th class="left">Update Link Text<br /></th>
+				<td class="right"><input type="checkbox" name="update_link_text" id="update_link_text" value="1" /></td>
+			</tr>
+			<tr>
+				<th class="left">Update Link URL<br /></th>
+				<td class="right"><input type="checkbox" name="update_link_url" id="update_link_url" value="1" /></td>
+			</tr>
+			<tr>
+				<th class="left">Use Page Title for Link Text<br />This will replace the text of the link with the title of the page the expanded URL points to.</th>
+				<td class="right"><input type="checkbox" name="update_link_title" id="update_link_title" value="1" /></td>
+			</tr>
+			<tr>
+				<th class="left">Maximum Number of Cached URLs <br /></th>
+				<td class="right"><input type="text" name="max_url_cache" id="max_url_cache" value="500" /></td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+
+<div id="footer">
+  <button id="save-button" style="font-weight:bold" onclick="save()"
+    >Save</button>
+  <button onclick="init()">Cancel</button>
+</div>
+</body>
+</html>
