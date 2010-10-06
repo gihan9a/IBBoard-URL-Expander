@@ -38,10 +38,10 @@
 				{
 					localStorage.icon = 1;
 				}
-				if(localStorage.cacheLength == undefined)
+			/*	if(localStorage.cacheLength == undefined)
 				{
 					localStorage.cacheLength = 500;
-				}
+				} */
 				if(localStorage.showTitle == undefined)
 				{
 					localStorage.showTitle = 0;
@@ -59,8 +59,8 @@
 			function getOptions(callback) {
 				// This function returns the option value requested
 			    // And updates the list of valid services this extension supports
-                getExpandServices();
-				cleanupCache();
+               // getExpandServices();
+			//	cleanupCache();
                 // Check to make sure all options are set with a value.
 				checkOptions();
 				options = {
@@ -110,12 +110,13 @@
 			
 			function expandUrl(url, callback)
 			{
+				var urlCache;
 				// This function gets the expanded URL from a shortened URL
 				if(localStorage.urlCache == undefined)
 				{
 					urlCache = {};
 				} else {
-					var urlCache = JSON.parse(localStorage.urlCache);
+					urlCache = JSON.parse(localStorage.urlCache);
 				}
 				if(url in urlCache)
 				{
@@ -123,14 +124,16 @@
 				} else
 				{
 					$.urlExtender(url, function(result){
-					    urlCache[url] = {"long_url":result["url"], "title":result['title']};
-						localStorage.urlCache = JSON.stringify(urlCache);
+					/*	if(result) {
+					    	urlCache[url] = {"long_url":result["url"], "title":result['title']};
+							localStorage.urlCache = JSON.stringify(urlCache);
+						} */
 						callback(result);
 					});
 				}	
 			}
 			
-			function cleanupCache()
+			/* function cleanupCache()
 			{
 				if(localStorage.urlCache != undefined) {
 					var urlCache = JSON.parse(localStorage.urlCache);
@@ -149,17 +152,17 @@
 						localStorage.urlCache = JSON.stringify(newUrlCache);
 					}
 				}
-				console.log(localStorage.urlCache);
-			}
+				//console.log(localStorage.urlCache);
+			} */
 			
-			function getExpandServices()
+		/*	function getExpandServices()
 			{
 				// This function gets the list of valid expansion services
 				
 				$.urlExtenderServices(function(result){
 					localStorage.services = JSON.stringify(result);
 				});
-			}
+			}*/
 			
 			/**
 				This section handled data sent via chrome.extension.sendRequest().

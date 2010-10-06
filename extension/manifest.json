@@ -1,6 +1,6 @@
 {
 	"name": "Chrome URL Expander",
-  	"version": "1.5.2",
+  	"version": "1.5.4",
   	"description": "This extension expands links from many url shortening services.",
   	"permissions": [
     	"tabs", "http://therealurl.appspot.com/*"

@@ -52,13 +52,17 @@ function getURLList()
 		buttonState = button.buttonState;
 		if(buttonState == 1)
 		{
-			$("a").filter(function() {
-				var urlRegEx = /(http:\/\/)?([^\/]+)/;
-				var urlMatch = urlRegEx.exec(this.href);
-				var urlString = urlMatch ? urlMatch[2] : null;
-				if (urlString && urlString in services)
+			$("a").filter(function(index) {
+//				var urlRegEx = /(http:\/\/)([^\/]+)/;
+				urlRegEx = /(http:\/\/)(\w{1,8}\.\w{1,3})\/\w{1,10}$/;
+				hrefString = $(this).attr('href');
+				urlMatch = urlRegEx.exec(hrefString);
+				urlString = urlMatch ? urlMatch[2] : null;
+				if (urlString && !(urlString in services))
 				{
-					return this.href;
+					return this;
+				} else {
+					return false;
 				}
 			}).each(function(index) {
 				var element = $(this);
@@ -80,9 +84,9 @@ function getURLList()
 			{
 				$("a[org_url]").each(function(index) {
 					checkOpts();
-					var element = $(this);
-					var org_url = element.attr('org_url');
-					var org_title = element.attr('org_title');
+					element = $(this);
+					org_url = element.attr('org_url');
+					org_title = element.attr('org_title');
 					element.removeAttr('org_url');
 					element.removeAttr('org_title');
 					expandLink(element, {'url':org_url, 'title':org_title});
