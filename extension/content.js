@@ -16,6 +16,8 @@ var changed = 0;
 var maxUrlDisplayChars = 0;
 var updateLinkText = 0;
 var updateLinkUrl = 1;
+var urlCache = new Object();
+var urlToExpand = "";
 
 checkOpts();
 getURLList();
@@ -33,66 +35,52 @@ function checkOpts()
 	});
 }
 
+
 $('body').bind('DOMNodeInserted' , function() {
   getURLList();
 });
-$('body').bind('DOMCharacterDataModified' , function() {
-  getURLList();
-});
 
+
+/*
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse){
 	getURLList();
 	sendResponse();
 });
+*/
 
 
 function getURLList()
 {
-	chrome.extension.sendRequest({'action' : 'getButtonState'}, function(button){
-		buttonState = button.buttonState;
-		if(buttonState == 1)
+	$("a").filter(function(index) {
+		var urlRegEx = /(http:\/\/)([^\/]+)/;
+		//urlRegEx = /(http:\/\/)(\w{1,8}\.\w{1,3})\/\w{1,10}$/;
+		hrefString = $(this).attr('href');
+		urlMatch = urlRegEx.exec(hrefString);
+		urlString = urlMatch ? urlMatch[2] : null;
+		if (urlString && (urlString in services))
 		{
-			$("a").filter(function(index) {
-//				var urlRegEx = /(http:\/\/)([^\/]+)/;
-				urlRegEx = /(http:\/\/)(\w{1,8}\.\w{1,3})\/\w{1,10}$/;
-				hrefString = $(this).attr('href');
-				urlMatch = urlRegEx.exec(hrefString);
-				urlString = urlMatch ? urlMatch[2] : null;
-				if (urlString && !(urlString in services))
-				{
-					return this;
-				} else {
-					return false;
-				}
-			}).each(function(index) {
-				var element = $(this);
-				var url = element.attr("href");
-				var urlTitle = element.html();
-				chrome.extension.sendRequest({'action' : 'expandUrl', 'url' : url }, function(data){
-					if(data != null)
-					{
-						changed = 1;
-						element.attr('org_url', url);
-						element.attr('org_title', urlTitle);
-						expandLink(element, data);
-					}
-				});
-			});
-		} else
-		{
-			if(changed == 1)
-			{
-				$("a[org_url]").each(function(index) {
-					checkOpts();
-					element = $(this);
-					org_url = element.attr('org_url');
-					org_title = element.attr('org_title');
-					element.removeAttr('org_url');
-					element.removeAttr('org_title');
-					expandLink(element, {'url':org_url, 'title':org_title});
-					changed = 0;
-				});
+			return this;
+		} else {
+			return false;
 			}
+	}).each(function(index, value) {
+		var element = $(this);
+		urlToExpand = element.attr("href");
+		var urlTitle = element.html();
+		if(!(urlToExpand in urlCache))
+		{
+			urlCache[urlToExpand] = new Object();
+			chrome.extension.sendRequest({'action' : 'expandUrl', 'url' : urlToExpand }, function(data){
+				if(data != null)
+				{
+					urlCache[urlToExpand]['long-url'] = data['long-url'];
+					urlCache[urlToExpand]['title'] = data['title'];
+					expandLink(element, data);
+				}
+			});
+		} else {
+			urlData = urlCache[urlToExpand];
+			expandLink(element, urlData);
 		}
 	});
 }
@@ -105,25 +93,31 @@ function expandLink(element, data)
 		{
 			if(updateLinkTitle == 1)
 			{
-				element.html(data.title);
+				if(data.title)
+				{
+					element.html(data.title);
+				} else
+				{
+					element.html(data['long-url']);
+				}
 			} else {
 				if(maxUrlDisplayChars > 0)
 				{
 					if(data.length <= maxUrlDisplayChars)
 					{
-						element.html(data.url);
+						element.html(data['long-url']);
 					} else {
-						element.html(data.url.substring(0, maxUrlDisplayChars) + '...');
+						element.html(data['long-url'].substring(0, maxUrlDisplayChars) + '...');
 					}
 				} else
 				{
-					element.html(data.url);
+					element.html(data['long-url']);
 				}
 			}
 		} 
 	}
 	if(updateLinkUrl == 1)
 	{
-		element.attr('href', data.url);
+		element.attr('href', data['long-url']);
 	}		
 }

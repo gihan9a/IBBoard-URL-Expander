@@ -71,7 +71,7 @@
 	}
 	
 </style>
-<script src='libs/jquery-1.4.2.min.js'></script>
+<script src='libs/jquery-1.5.min.js'></script>
 <script>
 $(document).ready(function() {
   /**
@@ -128,7 +128,6 @@ function init()
 function saveOptions()
 {
 	localStorage.maxUrlLength = $("#max_url_length").val();
-	localStorage.cacheLength = $("#max_url_cache").val();
 	if($("#update_link_text").is(':checked'))
 	{
 		localStorage.updateLinkText = 1;
@@ -146,6 +145,7 @@ function saveOptions()
 	if($("#update_link_title").is(':checked'))
 	{
 		localStorage.showTitle = 1;
+		localStorage.updateLinkText = 1;
 	} else
 	{
 		localStorage.showTitle = 0;
@@ -186,10 +186,6 @@ function makeDirty()
 			<tr>
 				<th class="left">Use Page Title for Link Text<br />This will replace the text of the link with the title of the page the expanded URL points to.</th>
 				<td class="right"><input type="checkbox" name="update_link_title" id="update_link_title" value="1" /></td>
-			</tr>
-			<tr>
-				<th class="left">Maximum Number of Cached URLs <br /></th>
-				<td class="right"><input type="text" name="max_url_cache" id="max_url_cache" value="500" /></td>
 			</tr>
 		</tbody>
 	</table>

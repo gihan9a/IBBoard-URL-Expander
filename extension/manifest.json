@@ -1,9 +1,9 @@
 {
-	"name": "Chrome URL Expander",
-  	"version": "1.5.4",
+	"name": "Tactical URL Expander",
+  	"version": "1.6",
   	"description": "This extension expands links from many url shortening services.",
   	"permissions": [
-    	"tabs", "http://therealurl.appspot.com/*"
+    	"tabs", "http://api.longurl.org/v2/*"
   	],
 	"icons": { "48": "images/logo48.png",
 			   "128": "images/logo128.png"
@@ -13,12 +13,8 @@
   	"content_scripts": [
     {
     	"matches": ["http://*/*", "https://*/*"],
-      	"js" : ["libs/jquery-1.4.2.min.js", "content.js"]
+      	"js" : ["libs/jquery-1.5.min.js", "content.js"]
     }
   	],
-	"browser_action": {
-	     "default_icon": "images/onbutton.png",
-		 "title": "Disable URL Expander"
-	 },
-	"minimum_chrome_version" : "4.1"
+	"minimum_chrome_version" : "9.0"
 }

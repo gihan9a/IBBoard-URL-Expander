@@ -14,7 +14,7 @@
 		 *
 		 */
 		</script>
-    	<script src='libs/jquery-1.4.2.min.js'></script>
+    	<script src='libs/jquery-1.5.min.js'></script>
 		<script src='libs/jquery.urlExtender.js'></script>
   	</head>
 	<body>
@@ -34,33 +34,16 @@
 				{
 					localStorage.updateLinkUrl = 1;
 				}
-				if(localStorage.icon == undefined)
-				{
-					localStorage.icon = 1;
-				}
-			/*	if(localStorage.cacheLength == undefined)
-				{
-					localStorage.cacheLength = 500;
-				} */
 				if(localStorage.showTitle == undefined)
 				{
 					localStorage.showTitle = 0;
 				}
 			}
 			
-			function getButtonState(callback)
-			{
-				button = {
-					'buttonState' : localStorage.icon
-				}
-				callback(button);
-			}
-			
 			function getOptions(callback) {
 				// This function returns the option value requested
 			    // And updates the list of valid services this extension supports
-               // getExpandServices();
-			//	cleanupCache();
+               	 getExpandServices();
                 // Check to make sure all options are set with a value.
 				checkOptions();
 				options = {
@@ -70,99 +53,31 @@
 					'updateLinkTitle' : localStorage.showTitle,
 					'services' : localStorage.services
 				}
-				setIcon();
 				
 				callback(options);
 			}
 			
-			function buttonClicked() {
-				// This function is ran everytime the toolbar button is clicked.
-				// It tells the content script to run again and updates the toolbar icon.
-				var icon = localStorage.icon;
-				if(icon == 0)
-				{
-					icon = 1;
-				} else {
-					icon = 0;
-				}
-				localStorage.icon = icon;
-	            setIcon();
-				chrome.tabs.getSelected(null, function(tab) { 
-				 	chrome.tabs.sendRequest(tab.id, {'var': 'empty'}); 
-				});
-			}
-			
-			function setIcon()
-			{
-				// This function physical sets the icon based on the current status.
-				
-				if(localStorage.icon == 1)
-				{
-					chrome.browserAction.setIcon({path:"images/onbutton.png"});
-					chrome.browserAction.setTitle({title:"Disable URL Expander"});
-				
-				} else
-				{
-					chrome.browserAction.setIcon({path:"images/offbutton.png"});
-					chrome.browserAction.setTitle({title:"Enable URL Expander"});
-				}
-			}
-			
 			function expandUrl(url, callback)
 			{
-				var urlCache;
 				// This function gets the expanded URL from a shortened URL
-				if(localStorage.urlCache == undefined)
-				{
-					urlCache = {};
-				} else {
-					urlCache = JSON.parse(localStorage.urlCache);
-				}
-				if(url in urlCache)
-				{
-					callback({"url": urlCache[url]["long_url"], "title": urlCache[url]["title"]});
-				} else
-				{
-					$.urlExtender(url, function(result){
-					/*	if(result) {
-					    	urlCache[url] = {"long_url":result["url"], "title":result['title']};
-							localStorage.urlCache = JSON.stringify(urlCache);
-						} */
-						callback(result);
-					});
-				}	
+				$.urlExtender(url, function(result){
+					callback(result);
+				});	
 			}
-			
-			/* function cleanupCache()
-			{
-				if(localStorage.urlCache != undefined) {
-					var urlCache = JSON.parse(localStorage.urlCache);
-					var keys = [];
-					var newUrlCache = {};
-					var cacheLength = localStorage.cacheLength;
-					$.each(urlCache, function(key, value){
-						keys.push(key);
-					});
-					if(keys.length > cacheLength)
-					{
-						keys = keys.slice(cacheLength * -1);
-						$.each(keys, function(key, value) {
-							newUrlCache[value] = urlCache[value];
-						})
-						localStorage.urlCache = JSON.stringify(newUrlCache);
-					}
-				}
-				//console.log(localStorage.urlCache);
-			} */
-			
-		/*	function getExpandServices()
+						
+			function getExpandServices()
 			{
 				// This function gets the list of valid expansion services
 				
 				$.urlExtenderServices(function(result){
-					localStorage.services = JSON.stringify(result);
+					var allServices = {}
+					$.each(result, function(index, value) {
+						service = value.domain
+						allServices[service] = service;
+					});
+					localStorage.services = JSON.stringify(allServices);
 				});
-			}*/
+			}
 			
 			/**
 				This section handled data sent via chrome.extension.sendRequest().
@@ -188,7 +103,6 @@
 			}
 			
 			chrome.extension.onRequest.addListener(onRequest);
-			chrome.browserAction.onClicked.addListener(buttonClicked);
 			
 		</script>
 </html>
