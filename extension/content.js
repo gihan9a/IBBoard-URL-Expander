@@ -17,7 +17,6 @@ var maxUrlDisplayChars = 0;
 var updateLinkText = 0;
 var updateLinkUrl = 1;
 var urlCache = new Object();
-var urlToExpand = "";
 
 checkOpts();
 getURLList();
@@ -35,37 +34,42 @@ function checkOpts()
 	});
 }
 
-
 $('body').bind('DOMNodeInserted' , function() {
   getURLList();
 });
 
-
-/*
-chrome.extension.onRequest.addListener(function(request, sender, sendResponse){
-	getURLList();
-	sendResponse();
-});
-*/
-
-
 function getURLList()
 {
 	$("a").filter(function(index) {
-		var urlRegEx = /(http:\/\/)([^\/]+)/;
-		//urlRegEx = /(http:\/\/)(\w{1,8}\.\w{1,3})\/\w{1,10}$/;
-		hrefString = $(this).attr('href');
-		urlMatch = urlRegEx.exec(hrefString);
-		urlString = urlMatch ? urlMatch[2] : null;
-		if (urlString && (urlString in services))
+		var hrefString = $(this).attr('href');
+		if (isExpandable(hrefString))
 		{
 			return this;
 		} else {
 			return false;
-			}
+		}
 	}).each(function(index, value) {
 		var element = $(this);
-		urlToExpand = element.attr("href");
+		var urlToExpand = element.attr("href");
+
+		if (urlToExpand.search(/^https?:\/\/t.co\//) !== -1)
+		{
+			var tmpUrl = element.attr('data-expanded-url');
+			if (tmpUrl)
+			{
+				if (!isExpandable(tmpUrl))
+				{
+					urlCache[urlToExpand] = new Object();
+					urlCache[urlToExpand]['long-url'] = tmpUrl;
+					urlCache[urlToExpand]['title'] = tmpUrl;
+				}
+				else
+				{
+					urlToExpand = tmpUrl;
+				}
+			}
+		}
+
 		var urlTitle = element.html();
 		if(!(urlToExpand in urlCache))
 		{
@@ -73,23 +77,39 @@ function getURLList()
 			chrome.extension.sendRequest({'action' : 'expandUrl', 'url' : urlToExpand }, function(data){
 				if(data != null)
 				{
-					urlCache[urlToExpand]['long-url'] = data['long-url'];
-					urlCache[urlToExpand]['title'] = data['title'];
-					expandLink(element, data);
+					var origUrl = data['orig-url'];
+					urlCache[origUrl]['long-url'] = data['long-url'];
+					urlCache[origUrl]['title'] = data['title'];
+					expandLink(element, origUrl, data);
 				}
 			});
 		} else {
 			urlData = urlCache[urlToExpand];
-			expandLink(element, urlData);
+			expandLink(element, urlToExpand, urlData);
 		}
 	});
 }
 
-function expandLink(element, data)
+function isExpandable(hrefString)
+{
+	var urlRegEx = /(https?:\/\/)([^\/]+)/;
+	var urlMatch = urlRegEx.exec(hrefString);
+	var urlString = urlMatch ? urlMatch[2] : null;
+	if (urlString && (urlString in services))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+function expandLink(element, urlToExpand, data)
 {
 	if(updateLinkText == 1)
 	{
-		if(element.attr('href') == element.text() || changed == 1)
+		if(element.attr('href').replace(/^https?:\/\//, '') == element.text().replace(/^https?:\/\//, '') || urlToExpand.replace(/^https?:\/\//, '') == element.text().replace(/^https?:\/\//, '') || changed == 1)
 		{
 			if(updateLinkTitle == 1)
 			{

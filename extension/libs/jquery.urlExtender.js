@@ -29,7 +29,9 @@
 		options.fetch( url, function(data){
 			if(data['long-url'] == url) {
 				data = null;
-			} 
+			} else {
+				data['orig-url'] = url;
+			}
 			if($.isFunction(callback)){
 			      callback.call(this, data);
 			}
