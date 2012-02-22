@@ -57,10 +57,12 @@ function getURLList()
 			var tmpUrl = element.attr('data-expanded-url');
 			if (tmpUrl)
 			{
+				tmpUrl = cleanUrl(tmpUrl);
 				if (!isExpandable(tmpUrl))
 				{
 					urlCache[urlToExpand] = new Object();
 					urlCache[urlToExpand]['long-url'] = tmpUrl;
+					//We're not pulling the title here, but never mind - it saves time and bandwidth
 					urlCache[urlToExpand]['title'] = tmpUrl;
 				}
 				else
@@ -78,13 +80,24 @@ function getURLList()
 				if(data != null)
 				{
 					var origUrl = data['orig-url'];
+					data['long-url'] = cleanUrl(data['long-url']);
 					urlCache[origUrl]['long-url'] = data['long-url'];
 					urlCache[origUrl]['title'] = data['title'];
 					expandLink(element, origUrl, data);
 				}
 			});
 		} else {
-			urlData = urlCache[urlToExpand];
+			var urlData = urlCache[urlToExpand];
+			var longUrl = urlData['long-url'];
+
+			if (longUrl) {
+				var cleanedURL = cleanUrl(longUrl);
+				if (longUrl != cleanedURL) {
+					urlCache[urlToExpand]['long-url'] = cleanedURL;
+					urlData['long-url'] = cleanedURL;
+				}
+			}
+			
 			expandLink(element, urlToExpand, urlData);
 		}
 	});
@@ -103,6 +116,11 @@ function isExpandable(hrefString)
 	{
 		return false;
 	}
+}
+
+function cleanUrl(url)
+{
+	return url ? url.replace(/&?utm_[^=]+=[^&]+/g, '').replace(/\?$/, '') : url;
 }
 
 function expandLink(element, urlToExpand, data)
