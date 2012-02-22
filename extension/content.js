@@ -58,15 +58,19 @@ function getURLList()
 			if (tmpUrl)
 			{
 				tmpUrl = cleanUrl(tmpUrl);
+				var tmpObject = new Object();
+				tmpObject['long-url'] = tmpUrl;
+				//We're not pulling the title here, but never mind - it saves time and bandwidth
+				tmpObject['title'] = tmpUrl;
+				
 				if (!isExpandable(tmpUrl))
 				{
-					urlCache[urlToExpand] = new Object();
-					urlCache[urlToExpand]['long-url'] = tmpUrl;
-					//We're not pulling the title here, but never mind - it saves time and bandwidth
-					urlCache[urlToExpand]['title'] = tmpUrl;
+					urlCache[urlToExpand] = tmpObject;
 				}
 				else
 				{
+					//Expand now in case the subseqent expansion request fails
+					expandLink(element, urlToExpand, tmpObject);
 					urlToExpand = tmpUrl;
 				}
 			}
