@@ -124,7 +124,7 @@ function isExpandable(hrefString)
 
 function cleanUrl(url)
 {
-	return url ? url.replace(/&?utm_[^=]+=[^&]+/g, '').replace(/\?$/, '') : url;
+	return url ? url.replace(/utm_[^=]+=[^&]+(&|$)/g, '').replace(/\?$/, '') : url;
 }
 
 function expandLink(element, urlToExpand, data)
