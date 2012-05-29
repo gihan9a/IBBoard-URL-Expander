@@ -1,7 +1,7 @@
 {
-	"name": "Tactical URL Expander",
-  	"version": "1.6",
-  	"description": "This extension expands links from many url shortening services.",
+	"name": "Short URL Expander/Cleaner",
+  	"version": "1.0",
+  	"description": "This extension expands short URLs and cleans/removes 'utm' tracking information. Based on the Tactical URL Expander.",
   	"permissions": [
     	"tabs", "http://api.longurl.org/v2/*"
   	],
