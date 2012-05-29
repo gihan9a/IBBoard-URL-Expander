@@ -1,14 +1,14 @@
 /*
- * Chrome URL Extender contentscript.js
+ * Short URL Expander/Cleaner
+ * https://github.com/IBBoard/IBBoard-URL-Expander
+ *
+ * 
+ * Based on Chrome URL Extender
  * http://www.tacticalcoder.com
  *
  * Copyright 2010, Don Magee
+ * Copyright 2012, IBBoard
  * Dual licensed under the MIT or GPL Version 2 licenses.
- *
- * Created Date: Tuesday March 30th, 2010
- *
- * Last Modified Date: Saturday April 24th, 2010 
- *
  * 
 */
 var services = {};
@@ -127,11 +127,17 @@ function cleanUrl(url)
 	return url ? url.replace(/((\?)|&)utm_[^=]*=[^&]*/g, '$2').replace(/\?$/, '') : url;
 }
 
+function createCompareUrl(url)
+{
+	return url.replace(/^https?:\/\//, '').replace(/\s/, '');
+}
+
 function expandLink(element, urlToExpand, data)
 {
 	if(updateLinkText == 1)
 	{
-		if(element.attr('href').replace(/^https?:\/\//, '') == element.text().replace(/^https?:\/\//, '') || urlToExpand.replace(/^https?:\/\//, '') == element.text().replace(/^https?:\/\//, '') || changed == 1)
+		var comparableElementText = createCompareUrl(element.text());
+		if(createCompareUrl(element.attr('href')) == comparableElementText || createCompareUrl(urlToExpand) == comparableElementText || changed == 1)
 		{
 			if(updateLinkTitle == 1)
 			{
