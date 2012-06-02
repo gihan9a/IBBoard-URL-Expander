@@ -12,7 +12,6 @@
  * 
 */
 var services = {};
-var changed = 0;
 var maxUrlDisplayChars = 0;
 var updateLinkText = 0;
 var updateLinkUrl = 1;
@@ -92,9 +91,12 @@ function getAndExpand(element, urlToExpand) {
 
 			if (origUrl in pending) {
 				var pendingList = pending[origUrl];
-				for (key in pendingList) {
-					expandLink(pendingList[key], origUrl, data);
-					pendingList.shift();
+				var listLength = pendingList.length;
+				debuglog("Processing pending for " + origUrl + " (" + listLength + ")");
+				
+				for (i = 0; i < listLength; i++) {
+					expandLink(pendingList[0], origUrl, data);
+					pendingList.splice(0, 1);
 				}
 			}
 		}
@@ -103,8 +105,8 @@ function getAndExpand(element, urlToExpand) {
 
 function registerForExpansion(element, urlToExpand) {
 	var pendingList;
-	
-	if (pending.indexOf(urlToExpand) != -1) {
+	debuglog("  Pending " + urlToExpand);
+	if (urlToExpand in pending) {
 		pendingList = pending[urlToExpand];
 	} else {
 		pendingList = new Array();
@@ -131,6 +133,7 @@ function expandTwitterExpandedDataAttrib(element, urlToExpand) {
 		debuglog("  data-expanded-url: " + urlToExpand + " -> " + tmpUrl);
 		tmpUrl = cleanUrl(tmpUrl);
 		var tmpObject = new Object();
+		tmpObject['orig-url'] = urlToExpand;
 		tmpObject['long-url'] = tmpUrl;
 		//We're not pulling the title here, but never mind - it saves time and bandwidth
 		tmpObject['title'] = tmpUrl;
@@ -161,8 +164,7 @@ function expandLink(element, urlToExpand, data)
 {
 	if(updateLinkText == 1)
 	{
-		var comparableElementText = createCompareUrl(element.text());
-		if(createCompareUrl(element.attr('href')) == comparableElementText || createCompareUrl(urlToExpand) == comparableElementText || changed == 1)
+		if (shouldUpdateText(element, data))
 		{
 			if(updateLinkTitle == 1)
 			{
@@ -170,8 +172,6 @@ function expandLink(element, urlToExpand, data)
 			} else {
 				setLinkText(element, data);
 			}
-		}  else {
-			debuglog("  Update text: N " + createCompareUrl(urlToExpand) + " " + createCompareUrl(element.attr('href')) + " " + comparableElementText);
 		}
 	}
 	
@@ -179,7 +179,16 @@ function expandLink(element, urlToExpand, data)
 	{
 		debuglog("  Update href: " + element.attr('href') + " -> " + data['long-url']);
 		element.attr('href', data['long-url']);
+
+		if (isExpandable(data['long-url'])) {
+			doExpand(element);
+		}
 	}		
+}
+
+function shouldUpdateText(element, data) {
+	var comparableElementText = createCompareUrl(element.text());
+	return (createCompareUrl(element.attr('href')) == comparableElementText || createCompareUrl(data['orig-url']) == comparableElementText);
 }
 
 function createCompareUrl(url)
