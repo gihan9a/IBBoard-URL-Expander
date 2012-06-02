@@ -18,6 +18,7 @@ var updateLinkText = 0;
 var updateLinkUrl = 1;
 var urlCache = new Object();
 var loglevel = 0;
+var pending = new Array();
 
 startClean();
 
@@ -70,6 +71,8 @@ function doExpand(element) {
 	if(!(urlToExpand in urlCache))
 	{
 		getAndExpand(element, urlToExpand);
+	} else if (!urlCache[urlToExpand].title) {
+		registerForExpansion(element, urlToExpand);
 	} else {
 		expandCached(element, urlToExpand);
 	}
@@ -77,6 +80,8 @@ function doExpand(element) {
 
 function getAndExpand(element, urlToExpand) {
 	debuglog("  Not in cache: " + urlToExpand);
+	urlCache[urlToExpand] = new Object();
+	
 	chrome.extension.sendRequest({'action' : 'expandUrl', 'url' : urlToExpand }, function(data){
 		if(data != null)
 		{
@@ -84,8 +89,29 @@ function getAndExpand(element, urlToExpand) {
 			data['long-url'] = cleanUrl(data['long-url']);
 			urlCache[origUrl] = data;
 			expandLink(element, origUrl, data);
+
+			if (origUrl in pending) {
+				var pendingList = pending[origUrl];
+				for (key in pendingList) {
+					expandLink(pendingList[key], origUrl, data);
+					pendingList.shift();
+				}
+			}
 		}
 	});
+}
+
+function registerForExpansion(element, urlToExpand) {
+	var pendingList;
+	
+	if (pending.indexOf(urlToExpand) != -1) {
+		pendingList = pending[urlToExpand];
+	} else {
+		pendingList = new Array();
+		pending[urlToExpand] = pendingList;
+	}
+
+	pendingList.push(element);
 }
 
 function expandCached(element, urlToExpand) {
