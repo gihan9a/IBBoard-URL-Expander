@@ -17,11 +17,11 @@ var maxUrlDisplayChars = 0;
 var updateLinkText = 0;
 var updateLinkUrl = 1;
 var urlCache = new Object();
+var loglevel = 0;
 
-checkOpts();
-getURLList();
+startClean();
 // Get the options
-function checkOpts()
+function startClean()
 {
 	chrome.extension.sendRequest({'action' : 'getOptions'}, function(options){
 	
@@ -31,80 +31,83 @@ function checkOpts()
 		updateLinkUrl = options.updateLinkUrl;
 		updateLinkTitle = options.updateLinkTitle;
 		services = JSON.parse(options.services);
+		$('body').bind('DOMNodeInserted' , function() {
+			debuglog("DOMNodeInserted");
+			expandUrls();
+		});
+		expandUrls();
 	});
 }
 
-$('body').bind('DOMNodeInserted' , function() {
-  getURLList();
-});
-
-function getURLList()
+function expandUrls()
 {
-	$("a").filter(function(index) {
-		var hrefString = $(this).attr('href');
-		if (isExpandable(hrefString))
-		{
-			return this;
-		} else {
-			return false;
-		}
-	}).each(function(index, value) {
+	$("a").each(function(index) {
 		var element = $(this);
-		var urlToExpand = element.attr("href");
-
-		if (urlToExpand.search(/^https?:\/\/t.co\//) !== -1)
-		{
-			var tmpUrl = element.attr('data-expanded-url');
-			if (tmpUrl)
-			{
-				tmpUrl = cleanUrl(tmpUrl);
-				var tmpObject = new Object();
-				tmpObject['long-url'] = tmpUrl;
-				//We're not pulling the title here, but never mind - it saves time and bandwidth
-				tmpObject['title'] = tmpUrl;
-				
-				if (!isExpandable(tmpUrl))
-				{
-					urlCache[urlToExpand] = tmpObject;
-				}
-				else
-				{
-					//Expand now in case the subseqent expansion request fails
-					expandLink(element, urlToExpand, tmpObject);
-					urlToExpand = tmpUrl;
-				}
-			}
-		}
-
-		var urlTitle = element.html();
-		if(!(urlToExpand in urlCache))
-		{
-			urlCache[urlToExpand] = new Object();
-			chrome.extension.sendRequest({'action' : 'expandUrl', 'url' : urlToExpand }, function(data){
-				if(data != null)
-				{
-					var origUrl = data['orig-url'];
-					data['long-url'] = cleanUrl(data['long-url']);
-					urlCache[origUrl]['long-url'] = data['long-url'];
-					urlCache[origUrl]['title'] = data['title'];
-					expandLink(element, origUrl, data);
-				}
-			});
-		} else {
-			var urlData = urlCache[urlToExpand];
-			var longUrl = urlData['long-url'];
-
-			if (longUrl) {
-				var cleanedURL = cleanUrl(longUrl);
-				if (longUrl != cleanedURL) {
-					urlCache[urlToExpand]['long-url'] = cleanedURL;
-					urlData['long-url'] = cleanedURL;
-				}
-			}
-			
-			expandLink(element, urlToExpand, urlData);
+		if (isExpandable(element.attr('href'))) {
+			doExpand(element);
 		}
 	});
+}
+
+function doExpand(element) {
+	var urlToExpand = element.attr("href");
+	debuglog("Start expand " + urlToExpand);
+
+	if (urlToExpand.search(/^https?:\/\/t.co\//) !== -1)
+	{
+		var tmpUrl = element.attr('data-expanded-url');
+		if (tmpUrl)
+		{
+			debuglog("  data-expanded-url: " + urlToExpand + " -> " + tmpUrl);
+			tmpUrl = cleanUrl(tmpUrl);
+			var tmpObject = new Object();
+			tmpObject['long-url'] = tmpUrl;
+			//We're not pulling the title here, but never mind - it saves time and bandwidth
+			tmpObject['title'] = tmpUrl;
+			
+			if (!isExpandable(tmpUrl))
+			{
+				debuglog("  Cache data-expanded-url")
+				urlCache[urlToExpand] = tmpObject;
+			}
+			else
+			{
+				//Expand now in case the subseqent expansion request fails
+				debuglog("  Expand data-expanded-url");
+				expandLink(element, urlToExpand, tmpObject);
+				urlToExpand = tmpUrl;
+			}
+		}
+	}
+
+	var urlTitle = element.html();
+	if(!(urlToExpand in urlCache))
+	{
+		debuglog("  Not in cache: " + urlToExpand);
+		chrome.extension.sendRequest({'action' : 'expandUrl', 'url' : urlToExpand }, function(data){
+			if(data != null)
+			{
+				var origUrl = data['orig-url'];
+				data['long-url'] = cleanUrl(data['long-url']);
+				urlCache[origUrl] = data;
+				expandLink(element, origUrl, data);
+			}
+		});
+	} else {
+		debuglog("  In cache: " + urlToExpand);
+		var urlData = urlCache[urlToExpand];
+		var longUrl = urlData['long-url'];
+
+		if (longUrl) {
+			var cleanedURL = cleanUrl(longUrl);
+			if (longUrl != cleanedURL) {
+				urlCache[urlToExpand]['long-url'] = cleanedURL;
+				urlData['long-url'] = cleanedURL;
+			}
+		}
+		
+		expandLink(element, urlToExpand, urlData);
+	}
 }
 
 function isExpandable(hrefString)
@@ -112,6 +115,7 @@ function isExpandable(hrefString)
 	var urlRegEx = /(https?:\/\/)([^\/]+)/;
 	var urlMatch = urlRegEx.exec(hrefString);
 	var urlString = urlMatch ? urlMatch[2] : null;
+
 	if (urlString && (urlString in services))
 	{
 		return true;
@@ -162,10 +166,20 @@ function expandLink(element, urlToExpand, data)
 					element.html(data['long-url']);
 				}
 			}
-		} 
+		}  else {
+			debuglog("  Update text: N " + createCompareUrl(urlToExpand) + " " + createCompareUrl(element.attr('href')) + " " + comparableElementText);
+		}
 	}
+	
 	if(updateLinkUrl == 1)
 	{
+		debuglog("  Update href: " + element.attr('href') + " -> " + data['long-url']);
 		element.attr('href', data['long-url']);
 	}		
+}
+
+function debuglog(message){
+	if (loglevel == 1) {
+		console.log(message);
+	}
 }
