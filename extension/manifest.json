@@ -1,6 +1,6 @@
 {
 	"name": "Short URL Expander/Cleaner",
-  	"version": "1.0",
+  	"version": "1.0.1",
   	"description": "This extension expands short URLs and cleans/removes 'utm' tracking information. Based on the Tactical URL Expander.",
   	"permissions": [
     	"tabs", "http://api.longurl.org/v2/*"
