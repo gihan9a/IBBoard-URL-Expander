@@ -51,9 +51,11 @@ function expandUrls()
 
 function isExpandable(hrefString)
 {
-	var urlRegEx = /(https?:\/\/)([^\/]+)/;
+	//Regex is used to pull domain part and to make sure we have a path
+	//But ignores goo.gl's stats short links (which end with "+")
+	var urlRegEx = /^https?:\/\/([^\/]+)\/.*[^\+]$/;
 	var urlMatch = urlRegEx.exec(hrefString);
-	var urlString = urlMatch ? urlMatch[2] : null;
+	var urlString = urlMatch ? urlMatch[1] : null;
 
 	return (urlString && (urlString in services));
 }
