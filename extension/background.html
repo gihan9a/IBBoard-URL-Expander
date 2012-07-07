@@ -68,15 +68,19 @@
 			function getExpandServices()
 			{
 				// This function gets the list of valid expansion services
-				
-				$.urlExtenderServices(function(result){
-					var allServices = {}
-					$.each(result, function(index, value) {
-						service = value.domain
-						allServices[service] = service;
+				now = new Date();
+				if (localStorage.serviceslastfetch == undefined || localStorage.serviceslastfetch < (now - 86400000)){
+					$.urlExtenderServices(function(result){
+						console.log("Get all services");
+						var allServices = {}
+						$.each(result, function(index, value) {
+							service = value.domain
+							allServices[service] = service;
+						});
+						localStorage.serviceslastfetch = now.getTime();
+						localStorage.services = JSON.stringify(allServices);
 					});
-					localStorage.services = JSON.stringify(allServices);
-				});
+				}			
 			}
 			
 			/**

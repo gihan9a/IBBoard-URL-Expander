@@ -18,7 +18,7 @@
 	          	url: url, 
 	          	format: 'json',
 	          	title: 1,
-	          	'user-agent': 'Chrome-URL-Expander/1.6'
+	          	'user-agent': 'short-url-expandercleaner/1.0'
 	          },
 	          success: callback
 	    	});
@@ -45,7 +45,7 @@
 	          url: 'http://api.longurl.org/v2/services',
 	          data: { 
 	          	format: 'json',
-	          	'user-agent': 'Chrome-URL-Expander/1.6'
+	          	'user-agent': 'short-url-expandercleaner/1.0'
 	          },
 	          success: callback
 	    	});
