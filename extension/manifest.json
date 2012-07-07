@@ -1,20 +1,20 @@
 {
 	"name": "Short URL Expander/Cleaner",
-  	"version": "1.0.5",
-  	"description": "Know where you're going! This extension expands short URLs and cleans/removes 'utm' tracking information. Based on the Tactical URL Expander.",
-  	"permissions": [
-    	"http://api.longurl.org/v2/*"
-  	],
+	"version": "1.0.5",
+	"description": "Know where you're going! This extension expands short URLs and cleans/removes 'utm' tracking information. Based on the Tactical URL Expander.",
+	"permissions": [
+	"http://api.longurl.org/v2/*"
+	],
 	"icons": { "48": "images/logo48.png",
 			   "128": "images/logo128.png"
 			 },
 	"options_page" : "options.html",
-  	"background_page" : "background.html",
-  	"content_scripts": [
-    {
-    	"matches": ["http://*/*", "https://*/*"],
-      	"js" : ["libs/jquery-1.5.min.js", "content.js"]
-    }
-  	],
+	"background_page" : "background.html",
+	"content_scripts": [
+	{
+	"matches": ["http://*/*", "https://*/*"],
+		"js" : ["libs/jquery-1.5.min.js", "content.js"]
+	}
+	],
 	"minimum_chrome_version" : "9.0"
 }

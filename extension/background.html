@@ -22,103 +22,102 @@
 		<script>
 var cache = {};
 
-			function checkOptions()
-			{
-				if(localStorage.maxUrlLength == undefined)
-				{
-					localStorage.maxUrlLength = 0;
-				}
-				if(localStorage.updateLinkText == undefined)
-				{
-					localStorage.updateLinkText = 1;
-				}
-				if(localStorage.updateLinkUrl == undefined)
-				{
-					localStorage.updateLinkUrl = 1;
-				}
-				if(localStorage.showTitle == undefined)
-				{
-					localStorage.showTitle = 0;
-				}
-			}
-			
-			function getOptions(callback) {
-				// This function returns the option value requested
-				// And updates the list of valid services this extension supports
-				getExpandServices();
-				// Check to make sure all options are set with a value.
-				checkOptions();
-				options = {
-					'maxUrlLength' : localStorage.maxUrlLength,
-					'updateLinkText' : localStorage.updateLinkText,
-					'updateLinkUrl' : localStorage.updateLinkUrl,
-					'updateLinkTitle' : localStorage.showTitle,
-					'services' : localStorage.services
-				}
-				if (localStorage.cache != undefined)
-				{
-					cache = JSON.parse(localStorage.cache);
-				}
-				
-				callback(options);
-			}
-			
-			function expandUrl(url, callback)
-			{
-				if (cache[url] == undefined){
-					$.urlExtender(url, function(result){
-						cache[url] = result;
-						localStorage.cache = JSON.stringify(cache);
-						callback(result);
-					});
-				}
-				else
-				{
-					callback(cache[url]);
-				}
-				
-			}
+function checkOptions()
+{
+	if(localStorage.maxUrlLength == undefined)
+	{
+		localStorage.maxUrlLength = 0;
+	}
+	if(localStorage.updateLinkText == undefined)
+	{
+		localStorage.updateLinkText = 1;
+	}
+	if(localStorage.updateLinkUrl == undefined)
+	{
+		localStorage.updateLinkUrl = 1;
+	}
+	if(localStorage.showTitle == undefined)
+	{
+		localStorage.showTitle = 0;
+	}
+}
 
-			function getExpandServices()
-			{
-				now = new Date();
-				if (localStorage.serviceslastfetch == undefined || localStorage.serviceslastfetch < (now - 86400000)){
-					$.urlExtenderServices(function(result){
-						var allServices = {}
-						$.each(result, function(index, value) {
-							service = value.domain
-							allServices[service] = service;
-						});
-						localStorage.serviceslastfetch = now.getTime();
-						localStorage.services = JSON.stringify(allServices);
-					});
-				}
-			}
-			
-			/**
-				This section handled data sent via chrome.extension.sendRequest().
-				@param request object Data sent in the request
-				@param sender Object origin of the request
-				@param callback Function the method should call when the request is complete
-			**/
-			
-			function onRequest(request, sender, callback)
-			{
-				if (request.action == 'expandUrl')
-				{
-					expandUrl(request.url, callback);
-				}
-				if (request.action == 'getOptions')
-				{
-					getOptions(callback);
-				}
-				if(request.action == 'getButtonState')
-				{
-					getButtonState(callback);
-				}
-			}
-			
-			chrome.extension.onRequest.addListener(onRequest);
-			
+function getOptions(callback) {
+	// This function returns the option value requested
+	// And updates the list of valid services this extension supports
+	getExpandServices();
+	// Check to make sure all options are set with a value.
+	checkOptions();
+	options = {
+		'maxUrlLength' : localStorage.maxUrlLength,
+		'updateLinkText' : localStorage.updateLinkText,
+		'updateLinkUrl' : localStorage.updateLinkUrl,
+		'updateLinkTitle' : localStorage.showTitle,
+		'services' : localStorage.services
+	}
+	if (localStorage.cache != undefined)
+	{
+		cache = JSON.parse(localStorage.cache);
+	}
+	
+	callback(options);
+}
+
+function expandUrl(url, callback)
+{
+	if (cache[url] == undefined){
+		$.urlExtender(url, function(result){
+			cache[url] = result;
+			localStorage.cache = JSON.stringify(cache);
+			callback(result);
+		});
+	}
+	else
+	{
+		callback(cache[url]);
+	}
+	
+}
+
+function getExpandServices()
+{
+	now = new Date();
+	if (localStorage.serviceslastfetch == undefined || localStorage.serviceslastfetch < (now - 86400000)){
+		$.urlExtenderServices(function(result){
+			var allServices = {}
+			$.each(result, function(index, value) {
+				service = value.domain
+				allServices[service] = service;
+			});
+			localStorage.serviceslastfetch = now.getTime();
+			localStorage.services = JSON.stringify(allServices);
+		});
+	}
+}
+
+/**
+This section handles data sent via chrome.extension.sendRequest().
+@param request object Data sent in the request
+@param sender Object origin of the request
+@param callback Function the method should call when the request is complete
+**/
+
+function onRequest(request, sender, callback)
+{
+	if (request.action == 'expandUrl')
+	{
+		expandUrl(request.url, callback);
+	}
+	if (request.action == 'getOptions')
+	{
+		getOptions(callback);
+	}
+	if(request.action == 'getButtonState')
+	{
+		getButtonState(callback);
+	}
+}
+
+chrome.extension.onRequest.addListener(onRequest);
 		</script>
 </html>
