@@ -1,11 +1,18 @@
 /*
  * urlExtender Jquery Plugin v1.1
+ *
+ * Part of:
+ * Short URL Expander/Cleaner
+ * https://github.com/IBBoard/IBBoard-URL-Expander
+ *
+ * 
+ * Based on Chrome URL Extender
  * http://www.tacticalcoder.com
  *
  * Copyright 2010, Don Magee
+ * Copyright 2012, IBBoard
  * Dual licensed under the MIT or GPL Version 2 licenses.
- *
- * Date: Tuesday Feb 15th, 2011
+ * 
  */
 
 (function($){

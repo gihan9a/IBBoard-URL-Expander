@@ -1,25 +1,27 @@
 <html>
 	<head>
-		<script>
-		/*
-		 * Chrome URL Extender background.html
-		 * http://www.tacticalcoder.com
-		 *
-		 * Copyright 2010, Don Magee
-		 * Dual licensed under the MIT or GPL Version 2 licenses.
-		 *
-		 * Created Date: Tuesday March 30th, 2010
-		 *
-		 * Last Modified on: Saturday April 24th, 2010
-		 *
-		 */
-		</script>
-    	<script src='libs/jquery-1.5.min.js'></script>
+<!--
+/*
+ * Short URL Expander/Cleaner
+ * https://github.com/IBBoard/IBBoard-URL-Expander
+ *
+ * 
+ * Based on Chrome URL Extender
+ * http://www.tacticalcoder.com
+ *
+ * Copyright 2010, Don Magee
+ * Copyright 2012, IBBoard
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * 
+ */
+-->
+		<script src='libs/jquery-1.5.min.js'></script>
 		<script src='libs/jquery.urlExtender.js'></script>
   	</head>
 	<body>
 		<script>
-			
+var cache = {};
+
 			function checkOptions()
 			{
 				if(localStorage.maxUrlLength == undefined)
@@ -42,9 +44,9 @@
 			
 			function getOptions(callback) {
 				// This function returns the option value requested
-			    // And updates the list of valid services this extension supports
-               	 getExpandServices();
-                // Check to make sure all options are set with a value.
+				// And updates the list of valid services this extension supports
+				getExpandServices();
+				// Check to make sure all options are set with a value.
 				checkOptions();
 				options = {
 					'maxUrlLength' : localStorage.maxUrlLength,
@@ -53,25 +55,35 @@
 					'updateLinkTitle' : localStorage.showTitle,
 					'services' : localStorage.services
 				}
+				if (localStorage.cache != undefined)
+				{
+					cache = JSON.parse(localStorage.cache);
+				}
 				
 				callback(options);
 			}
 			
 			function expandUrl(url, callback)
 			{
-				// This function gets the expanded URL from a shortened URL
-				$.urlExtender(url, function(result){
-					callback(result);
-				});	
+				if (cache[url] == undefined){
+					$.urlExtender(url, function(result){
+						cache[url] = result;
+						localStorage.cache = JSON.stringify(cache);
+						callback(result);
+					});
+				}
+				else
+				{
+					callback(cache[url]);
+				}
+				
 			}
-						
+
 			function getExpandServices()
 			{
-				// This function gets the list of valid expansion services
 				now = new Date();
 				if (localStorage.serviceslastfetch == undefined || localStorage.serviceslastfetch < (now - 86400000)){
 					$.urlExtenderServices(function(result){
-						console.log("Get all services");
 						var allServices = {}
 						$.each(result, function(index, value) {
 							service = value.domain
@@ -80,7 +92,7 @@
 						localStorage.serviceslastfetch = now.getTime();
 						localStorage.services = JSON.stringify(allServices);
 					});
-				}			
+				}
 			}
 			
 			/**
