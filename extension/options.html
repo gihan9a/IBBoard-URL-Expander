@@ -1,20 +1,6 @@
 <html>
 <head>
-	<script>
-	/*
-	 * Chrome URL Extender options.html
-	 * http://www.tacticalcoder.com
-	 *
-	 * Copyright 2010, Don Magee
-	 * Dual licensed under the MIT or GPL Version 2 licenses.
-	 *
-	 * Created Date: Tuesday March 30th, 2010
-	 *
-	 * Last Modified Date: Saturday April 24th, 2010
-	 * 
-	 */
-	</script>
-<title>Chrome URL Expander - Options</title>
+<title>Short URL Expander/Cleaner - Options</title>
 <style>
 	body {
 		font-family:helvetica, arial, sans-serif;
@@ -72,101 +58,11 @@
 	
 </style>
 <script src='libs/jquery-1.5.min.js'></script>
-<script>
-$(document).ready(function() {
-  /**
-	* The first thing we need to do is load the default settings
-	*/
- 	chrome.extension.getBackgroundPage().checkOptions();
-	init();
-	
-});
-
-function init()
-{
-	$("#max_url_length").val(localStorage.maxUrlLength);
-	if(localStorage.updateLinkText == 1)
-	{
-		$("#update_link_text").attr('checked', true);
-	} else
-	{
-		$("#update_link_text").attr('checked', false);
-	}
-	if(localStorage.updateLinkUrl == 1)
-	{
-		$("#update_link_url").attr('checked', true);
-	} else
-	{
-		$("#update_link_url").attr('checked', false);
-	}
-	if(localStorage.showTitle == 1)
-	{
-		$("#update_link_title").attr('checked', true);
-	} else
-	{
-		$("#update_link_title").attr('checked', false);
-	}
-	makeClean();
-	$("#max_url_length").keydown(function() {
-		makeDirty();
-	});
-	$("#update_link_text").change(function() {
-		makeDirty();
-	})
-	$("#update_link_url").change(function() {
-		makeDirty();
-	})
-	$("#update_link_title").change(function() {
-		makeDirty();
-	})
-	$("#update_url_cache").keydown(function(){
-		makeDirty();
-	})
-	$("#save-button").click(saveOptions);
-}
-
-function saveOptions()
-{
-	localStorage.maxUrlLength = $("#max_url_length").val();
-	if($("#update_link_text").is(':checked'))
-	{
-		localStorage.updateLinkText = 1;
-	} else
-	{
-		localStorage.updateLinkText = 0;
-	}
-	if($("#update_link_url").is(':checked'))
-	{
-		localStorage.updateLinkUrl = 1;
-	} else
-	{
-		localStorage.updateLinkUrl = 0;
-	}
-	if($("#update_link_title").is(':checked'))
-	{
-		localStorage.showTitle = 1;
-		localStorage.updateLinkText = 1;
-	} else
-	{
-		localStorage.showTitle = 0;
-	}
-	makeClean();
-}
-
-function makeClean()
-{
-	$("#save-button").attr('disabled', 'disabled');
-}
-
-function makeDirty()
-{
-	$("#save-button").removeAttr('disabled');
-}
-</script>
+<script src='options.js'></script>
 </head>
 <body>
 
-<div id="header"><h1>Chrome URL Expander - Options</h1></div>
+<div id="header"><h1>Short URL Expander/Cleaner - Options</h1></div>
 
 <div class="curle-settings-content">
 	<table class="curle-settings-table">
@@ -192,9 +88,8 @@ function makeDirty()
 </div>
 
 <div id="footer">
-  <button id="save-button" style="font-weight:bold" onclick="save()"
-    >Save</button>
-  <button onclick="init()">Cancel</button>
+  <button id="save-button" style="font-weight:bold">Save</button>
+  <button id="cancel-button">Cancel</button>
 </div>
 </body>
 </html>

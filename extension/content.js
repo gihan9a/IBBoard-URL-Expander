@@ -16,14 +16,15 @@ var maxUrlDisplayChars = 0;
 var updateLinkText = 0;
 var updateLinkUrl = 1;
 var urlCache = new Object();
-var loglevel = 0;
+var loglevel = 1;
 var pending = new Array();
 
 startClean();
 
 function startClean()
 {
-	chrome.extension.sendRequest({'action' : 'getOptions'}, function(options){
+	debuglog("Getting options");
+	chrome.extension.sendMessage({'action' : 'getOptions'}, function(options){
 		maxUrlDisplayChars = options.maxUrlLength;
 		updateLinkText = options.updateLinkText;
 		updateLinkUrl = options.updateLinkUrl;
@@ -83,7 +84,7 @@ function getAndExpand(element, urlToExpand) {
 	debuglog("  Not in cache: " + urlToExpand);
 	urlCache[urlToExpand] = new Object();
 	
-	chrome.extension.sendRequest({'action' : 'expandUrl', 'url' : urlToExpand }, function(data){
+	chrome.extension.sendMessage({'action' : 'expandUrl', 'url' : urlToExpand }, function(data){
 		if(data != null)
 		{
 			var origUrl = data['orig-url'];
